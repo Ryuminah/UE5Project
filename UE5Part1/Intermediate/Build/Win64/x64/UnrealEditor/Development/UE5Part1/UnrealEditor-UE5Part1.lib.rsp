@@ -1,0 +1,15 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UnrealEditor-UE5Part1.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"D:\SourceTree_Clone\UE5Project\UE5Part1\Intermediate\Build\Win64\x64\UE5Part1Editor\Development\UnrealEd\SharedPCH.UnrealEd.Project.ValApi.Cpp20.h.obj"
+"D:\SourceTree_Clone\UE5Project\UE5Part1\Intermediate\Build\Win64\x64\UnrealEditor\Development\UE5Part1\OatGameInstance.gen.cpp.obj"
+"D:\SourceTree_Clone\UE5Project\UE5Part1\Intermediate\Build\Win64\x64\UnrealEditor\Development\UE5Part1\UE5Part1.init.gen.cpp.obj"
+"D:\SourceTree_Clone\UE5Project\UE5Part1\Intermediate\Build\Win64\x64\UnrealEditor\Development\UE5Part1\OatGameInstance.cpp.obj"
+"D:\SourceTree_Clone\UE5Project\UE5Part1\Intermediate\Build\Win64\x64\UnrealEditor\Development\UE5Part1\UE5Part1.cpp.obj"
+"D:\SourceTree_Clone\UE5Project\UE5Part1\Intermediate\Build\Win64\x64\UnrealEditor\Development\UE5Part1\Default.rc2.res"
+/OUT:"D:\SourceTree_Clone\UE5Project\UE5Part1\Intermediate\Build\Win64\x64\UnrealEditor\Development\UE5Part1\UnrealEditor-UE5Part1.lib"
