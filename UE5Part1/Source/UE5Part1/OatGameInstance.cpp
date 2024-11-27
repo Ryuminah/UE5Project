@@ -3,55 +3,34 @@
 
 #include "OatGameInstance.h"
 
+UOatGameInstance::UOatGameInstance()
+{
+	// CDO에 해당 기본 값이 저장되어있음
+	// CDO는 에디터가 활성화 되기 이전에 초기화 되기 때문에, 에디터에서 인지를 못할 수 있음.
+	// 따라서 생성자 코드에서 CDO 관련 값을 변경할 떄는 에디터를 끄고 컴파일 한 뒤 실행하는 것이 안전함
+	SchoolName = TEXT("기본학교");
+}
+
 void UOatGameInstance::Init()
 {
 	Super::Init();
 
-	TCHAR LogCharArray[] = TEXT(" UOatGameInstance::Init()");
-	UE_LOG(LogTemp, Log,TEXT("%s"), LogCharArray);
+	UE_LOG(LogTemp, Log, TEXT("=============================="));
+	UClass* ClassRunTime = GetClass();
+	UClass* ClassCompileTime = UOatGameInstance::StaticClass();
 
-	FString LogCharString = LogCharArray;
-	UE_LOG(LogTemp, Log, TEXT("%s"), *LogCharString);
+	//check(ClassRunTime == ClassCompileTime);
 
-	const TCHAR* LongCharPtr = *LogCharString;
-	TCHAR* LogCharDataPtr = LogCharString.GetCharArray().GetData();
+	// 크래쉬 내지 않고 로그를 볼 수 있음
+	//ensure(ClassRunTime != ClassCompileTime);
+	//ensureMsgf(ClassRunTime != ClassCompileTime, TEXT("일부러 에러를 발생시킨 코드"));
 
-	TCHAR LogCharArrayWithSize[100];
-	FCString::Strcpy(LogCharArrayWithSize, LogCharString.Len(), *LogCharString);
+	UE_LOG(LogTemp, Log, TEXT("학교를 담당하는 클래스 이름 : %s"),*ClassRunTime->GetName());
+	UE_LOG(LogTemp, Log, TEXT("=============================="));
 
-	if (LogCharString.Contains(TEXT("oat"), ESearchCase::IgnoreCase))
-	{
-		int32 Index = LogCharString.Find(TEXT("oat"), ESearchCase::IgnoreCase);
-		FString EndString = LogCharString.Mid(Index);
-
-		UE_LOG(LogTemp, Log, TEXT("Find : %s"), *EndString);
-
-	}
-
-	FString Left, Right;
-	if (LogCharString.Split(TEXT("Oat"), &Left, &Right))
-	{
-		UE_LOG(LogTemp, Log, TEXT("Split : %s 와 %s"), *Left, *Right);
-
-	}
-
-	int32 IntValue = 32;
-	float FloatValue = 3.141592;
-
-	FString FloatIntString = FString::Printf(TEXT("Int:%d Float:%f"), IntValue, FloatValue);
-	FString FloatString = FString::SanitizeFloat(FloatValue);
-	FString IntString = FString::FromInt(IntValue);
-
-	UE_LOG(LogTemp, Log, TEXT("%s"), *FloatIntString);
-	UE_LOG(LogTemp, Log, TEXT("Int:%s Float:%s"), *IntString, *FloatString);
-
-	int32 IntValueFromString = FCString::Atoi(*IntString);
-	float FloatValueFromString = FCString::Atof(*FloatString);
-	UE_LOG(LogTemp, Log, TEXT("Int:%d Float:%f"), IntValueFromString, FloatValueFromString);
-
-	FName key1(TEXT("PELVIS"));
-	FName key2(TEXT("pelvis"));
-
-	UE_LOG(LogTemp, Log, TEXT("FName 비교 결과 : %s"), key1 == key2 ? TEXT("true") : TEXT("false"));
+	// 생성된 인스턴스에는 이름이 설정되어 있음
+	SchoolName = TEXT("청강대");
+	UE_LOG(LogTemp, Log, TEXT("학교 이름 : %s"), *SchoolName);
+	UE_LOG(LogTemp, Log, TEXT("CDO : %s"), *GetClass()->GetDefaultObject<UOatGameInstance>()->SchoolName);
 }
  

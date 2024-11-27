@@ -15,5 +15,13 @@ class UE5PART1_API UOatGameInstance : public UGameInstance
 	GENERATED_BODY()
 	
 public:
+	UOatGameInstance();
+
 	virtual void Init() override;
+
+private:
+	// 리플렉션 시스템 매크로
+	UPROPERTY()
+	FString SchoolName;
+	
 };
