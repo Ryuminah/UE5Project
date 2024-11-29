@@ -1,7 +1,8 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "OatGameInstance.h"
+#include "Teacher.h"
+#include "Student.h"
 
 UOatGameInstance::UOatGameInstance()
 {
@@ -32,5 +33,27 @@ void UOatGameInstance::Init()
 	SchoolName = TEXT("청강대");
 	UE_LOG(LogTemp, Log, TEXT("학교 이름 : %s"), *SchoolName);
 	UE_LOG(LogTemp, Log, TEXT("CDO : %s"), *GetClass()->GetDefaultObject<UOatGameInstance>()->SchoolName);
+
+	UStudent* student = NewObject<UStudent>();
+	UTeacher* teacher= NewObject<UTeacher>();
+
+	FString curTeacherName;
+	student->SetName(TEXT("고슬이"));
+	UE_LOG(LogTemp,Log, TEXT("새로운 학생 이름 : %s"),*student->GetName());
+
+	FProperty* NameProp = UTeacher::StaticClass()->FindPropertyByName(TEXT("Name"));
+	if (NameProp)
+	{
+		// 지정한 인스턴스의 값을 빼오는 것
+		NameProp->GetValue_InContainer(teacher,&curTeacherName);
+		UE_LOG(LogTemp, Log, TEXT("현재 선생님이름 : %s"), *teacher->GetName());
+
+		curTeacherName = TEXT("오트");
+		NameProp->SetValue_InContainer(teacher, &curTeacherName);
+		UE_LOG(LogTemp, Log, TEXT("현재 선생님이름 : %s"), *teacher->GetName());
+	}
+
+	curTeacherName = UTeacher::StaticClass()->GetDefaultObject<UTeacher>()->GetName();
+	UE_LOG(LogTemp, Log, TEXT("UTeacher CDO: %s"), *curTeacherName);
 }
  
