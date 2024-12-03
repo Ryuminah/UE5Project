@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
-#include "MyObject.generated.h"
+#include "GameFramework/GameModeBase.h"
+#include "OatGameModeBase.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class UE5PART1_API UMyObject : public UObject
+class UE5PART1_API AOatGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 	

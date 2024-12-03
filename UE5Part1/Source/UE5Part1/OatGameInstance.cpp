@@ -3,6 +3,7 @@
 #include "OatGameInstance.h"
 #include "Teacher.h"
 #include "Student.h"
+#include "Staff.h"
 
 UOatGameInstance::UOatGameInstance()
 {
@@ -16,44 +17,30 @@ void UOatGameInstance::Init()
 {
 	Super::Init();
 
-	UE_LOG(LogTemp, Log, TEXT("=============================="));
-	UClass* ClassRunTime = GetClass();
-	UClass* ClassCompileTime = UOatGameInstance::StaticClass();
 
-	//check(ClassRunTime == ClassCompileTime);
-
-	// 크래쉬 내지 않고 로그를 볼 수 있음
-	//ensure(ClassRunTime != ClassCompileTime);
-	//ensureMsgf(ClassRunTime != ClassCompileTime, TEXT("일부러 에러를 발생시킨 코드"));
-
-	UE_LOG(LogTemp, Log, TEXT("학교를 담당하는 클래스 이름 : %s"),*ClassRunTime->GetName());
-	UE_LOG(LogTemp, Log, TEXT("=============================="));
-
-	// 생성된 인스턴스에는 이름이 설정되어 있음
-	SchoolName = TEXT("청강대");
-	UE_LOG(LogTemp, Log, TEXT("학교 이름 : %s"), *SchoolName);
-	UE_LOG(LogTemp, Log, TEXT("CDO : %s"), *GetClass()->GetDefaultObject<UOatGameInstance>()->SchoolName);
-
-	UStudent* student = NewObject<UStudent>();
-	UTeacher* teacher= NewObject<UTeacher>();
-
-	FString curTeacherName;
-	student->SetName(TEXT("고슬이"));
-	UE_LOG(LogTemp,Log, TEXT("새로운 학생 이름 : %s"),*student->GetName());
-
-	FProperty* NameProp = UTeacher::StaticClass()->FindPropertyByName(TEXT("Name"));
-	if (NameProp)
+	UE_LOG(LogTemp, Log, TEXT("============================================"));
+	TArray<UPerson*> Persons = { NewObject<UStudent>(),NewObject<UTeacher>() ,NewObject<UStaff>() };
+	for (const auto Person : Persons)
 	{
-		// 지정한 인스턴스의 값을 빼오는 것
-		NameProp->GetValue_InContainer(teacher,&curTeacherName);
-		UE_LOG(LogTemp, Log, TEXT("현재 선생님이름 : %s"), *teacher->GetName());
-
-		curTeacherName = TEXT("오트");
-		NameProp->SetValue_InContainer(teacher, &curTeacherName);
-		UE_LOG(LogTemp, Log, TEXT("현재 선생님이름 : %s"), *teacher->GetName());
+		UE_LOG(LogTemp, Log, TEXT("%s"), *Person->GetName());
 	}
 
-	curTeacherName = UTeacher::StaticClass()->GetDefaultObject<UTeacher>()->GetName();
-	UE_LOG(LogTemp, Log, TEXT("UTeacher CDO: %s"), *curTeacherName);
+	UE_LOG(LogTemp, Log, TEXT("============================================"));
+
+
+	for (const auto Person : Persons)
+	{
+		ILessonInterface* LessonInterface = Cast<ILessonInterface>(Person);
+		if (LessonInterface)
+		{
+			UE_LOG(LogTemp, Log, TEXT("%s : 수업 참여 가능"), *Person->GetName());
+		}
+
+
+		else
+		{
+			UE_LOG(LogTemp, Log, TEXT("%s : 수업 참여 불가"), *Person->GetName());
+		}
+	}
 }
  

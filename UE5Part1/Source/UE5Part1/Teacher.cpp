@@ -5,14 +5,14 @@
 
 UTeacher::UTeacher()
 {
-	Name = TEXT("민아");
-	Year = 3;
-	Id = 1;
+	Name = TEXT("선생");
 }
 
 void UTeacher::DoLesson()
 {
-	Super::DoLesson();
-
-	UE_LOG(LogTemp, Log, TEXT("%d년차 %s쌤이 강의 중"),Year,*Name);
+	// 클래스 정보에 대해서는 단일 상속만 지원함.
+	// Super클래스가 UPerson으로 지정되어 있기 때문에, Super::DoLesson()은 사용할 수 없다. 
+	ILessonInterface::DoLesson();
+	UE_LOG(LogTemp, Log, TEXT("%s 강의중"), *Name);
 }
+

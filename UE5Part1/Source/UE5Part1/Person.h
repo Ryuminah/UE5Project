@@ -17,19 +17,14 @@ class UE5PART1_API UPerson : public UObject
 public:
 	UPerson();
 
-	UFUNCTION()
-	virtual void DoLesson();
-
-	const FString& GetName() const;
-	void SetName(const FString& InName);
+	// 무조건 inline 호출을 보장해 주지는 않음
+	FORCEINLINE FString& GetName() { return Name; }
+	FORCEINLINE void SetName(const FString& InName) { Name = InName; }
 
 
 protected:
 	UPROPERTY()
 	FString Name;
-	
-	UPROPERTY()
-	int32 Year;
 
 private:
 

@@ -3,24 +3,23 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
 #include "Person.h"
+#include "LessonInterface.h"
 #include "Teacher.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class UE5PART1_API UTeacher : public UPerson
+class UE5PART1_API UTeacher : public UPerson, public ILessonInterface
 {
 	GENERATED_BODY()
 
 public:
 	UTeacher();
+
 	virtual void DoLesson() override;
 
-private:
-	UPROPERTY()
-	int32 Id;
-	
+private: 
+
 };
