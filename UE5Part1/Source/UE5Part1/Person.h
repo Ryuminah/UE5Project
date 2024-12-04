@@ -18,13 +18,20 @@ public:
 	UPerson();
 
 	// 무조건 inline 호출을 보장해 주지는 않음
-	FORCEINLINE FString& GetName() { return Name; }
+	FORCEINLINE const FString& GetName() const { return Name; }
 	FORCEINLINE void SetName(const FString& InName) { Name = InName; }
+
+	FORCEINLINE class UCard* GetCard() const { return Card; }
+	FORCEINLINE void SetCard(class UCard* InCard) { Card = InCard; }
 
 
 protected:
 	UPROPERTY()
 	FString Name;
+
+	// UE5 style
+	UPROPERTY()
+	TObjectPtr<class UCard> Card;
 
 private:
 

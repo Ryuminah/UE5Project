@@ -4,6 +4,7 @@
 #include "Teacher.h"
 #include "Student.h"
 #include "Staff.h"
+#include "Card.h"
 
 UOatGameInstance::UOatGameInstance()
 {
@@ -17,30 +18,36 @@ void UOatGameInstance::Init()
 {
 	Super::Init();
 
-
 	UE_LOG(LogTemp, Log, TEXT("============================================"));
 	TArray<UPerson*> Persons = { NewObject<UStudent>(),NewObject<UTeacher>() ,NewObject<UStaff>() };
 	for (const auto Person : Persons)
 	{
-		UE_LOG(LogTemp, Log, TEXT("%s"), *Person->GetName());
+		UE_LOG(LogTemp, Log, TEXT("%s 입장"), *Person->GetName());
 	}
 
 	UE_LOG(LogTemp, Log, TEXT("============================================"));
 
 
 	for (const auto Person : Persons)
-	{
-		ILessonInterface* LessonInterface = Cast<ILessonInterface>(Person);
-		if (LessonInterface)
-		{
-			UE_LOG(LogTemp, Log, TEXT("%s : 수업 참여 가능"), *Person->GetName());
-		}
+	{ 
+		// Person : 컨테이너의 요소를 가리키는 포인터 타입
+		// Card : 이미 포인터여서 역참조가 필요 없음.
+		const UCard* Card = Person->GetCard();
+		check(Card);
 
+		// 방법 1
+		const UEnum* CardEnumType= FindObject<UEnum>(nullptr, TEXT("/script/UE5Part1.ECardType"));
 
-		else
+		// 방법 2
+		CardEnumType = StaticEnum<ECardType>();
+
+		if (CardEnumType)
 		{
-			UE_LOG(LogTemp, Log, TEXT("%s : 수업 참여 불가"), *Person->GetName());
+			FString CardMetaData = CardEnumType->GetDisplayNameTextByValue((int64)Card->GetCardType()).ToString();
+			UE_LOG(LogTemp, Log, TEXT("%s의 카드 타입 : %s"), *Person->GetName(), *CardMetaData);
 		}
 	}
 }
  
+
+
