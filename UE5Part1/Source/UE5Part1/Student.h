@@ -19,6 +19,7 @@ public:
 	UStudent();
 
 	virtual void DoLesson() override;
+	void GetNotification(const FString& School, const FString& NewCourseInfo);
 
 private:
 };

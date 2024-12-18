@@ -20,8 +20,13 @@ public:
 	virtual void Init() override;
 
 private:
+	// TObjectPtr을 이용해서 전방선언
+	UPROPERTY()
+	TObjectPtr<class UCourseInfo> CourseInfo;
+	
 	// 리플렉션 시스템 매크로
 	UPROPERTY()
 	FString SchoolName;
+
 	
 };

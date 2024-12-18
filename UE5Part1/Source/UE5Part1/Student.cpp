@@ -16,3 +16,8 @@ void UStudent::DoLesson()
 	UE_LOG(LogTemp, Log, TEXT("%s 수업 듣는 중"), *Name);
 }
 
+void UStudent::GetNotification(const FString& School, const FString& NewCourseInfo)
+{
+	UE_LOG(LogTemp, Log, TEXT("[Student] %s 님이 %s로부터 밭은 메세지 : %s"), *Name ,*School, *NewCourseInfo);
+}
+
