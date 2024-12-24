@@ -6,6 +6,7 @@
 #include "Staff.h"
 #include "Card.h"
 #include "CourseInfo.h"
+#include "Algo/Accumulate.h"
 
 UOatGameInstance::UOatGameInstance()
 {
@@ -26,26 +27,48 @@ void UOatGameInstance::Init()
 
 	UE_LOG(LogTemp, Log, TEXT("============================================"));
 	
-	UStudent* student1 = NewObject<UStudent>();
-	student1->SetName(TEXT("학생1"));
+	const int32 ArrayNum = 10;
+	TArray<int32> Int32Array;
 
-	UStudent* student2 = NewObject<UStudent>();
-	student2->SetName(TEXT("학생2"));
+	for (int32 i = 1; i <= ArrayNum; ++i)
+	{
+		Int32Array.Add(i);
+	}
 
-	UStudent* student3 = NewObject<UStudent>();
-	student3->SetName(TEXT("학생3"));
+	// 조건에 해당하는 구문을 람다로 넣기
+	Int32Array.RemoveAll([](int32 Val) {return Val % 2 == 0; });
+	// 예상값 -> {1,3,5,7,9}
 
-	// UObject와 클래스 멤버함수의 주소를 레퍼런스로 지정
-	CourseInfo->OnChanged.AddUObject(student1, &UStudent::GetNotification);
-	CourseInfo->OnChanged.AddUObject(student2, &UStudent::GetNotification);
-	CourseInfo->OnChanged.AddUObject(student3, &UStudent::GetNotification);
+	Int32Array += {2, 4, 6, 8, 10};
+	TArray<int32> Int32CompareArray;
+	int32 CArray[] = { 1,3,5,7,9,2,4,6,8,10 };
 
-	CourseInfo->ChangeCourseInfo(SchoolName, TEXT("변경된 학사 정보"));
+	// 초기화 되지 않은 데이터를 빠르게 넣어줌
+	Int32CompareArray.AddUninitialized(ArrayNum);
+
+	//C 스타일의 메모리 복사
+	FMemory::Memcpy(Int32CompareArray.GetData(), CArray, sizeof(int32) * ArrayNum);
+	ensure(Int32Array == Int32CompareArray);
+
+
+	FString strArray = TEXT("");
+	for (auto i : Int32Array )
+	{
+		strArray += FString::FromInt(i);
+	}
+	UE_LOG(LogTemp, Log, TEXT("기존 : %s"),*strArray);
+
+	FString strCopy = TEXT("");
+
+	for (auto i : Int32CompareArray)
+	{
+		strCopy += FString::FromInt(i);
+	}
+	UE_LOG(LogTemp, Log, TEXT("복사 : %s"), *strCopy);
+
+	int32 Sum = Algo::Accumulate(Int32Array,0);
+	UE_LOG(LogTemp, Log, TEXT("총 합: %d"), Sum);
 
 	UE_LOG(LogTemp, Log, TEXT("============================================"));
-
-
 }
  
-
-

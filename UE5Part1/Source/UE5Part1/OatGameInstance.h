@@ -24,9 +24,11 @@ private:
 	UPROPERTY()
 	TObjectPtr<class UCourseInfo> CourseInfo;
 	
-	// 리플렉션 시스템 매크로
 	UPROPERTY()
 	FString SchoolName;
+
+	UPROPERTY()
+	TArray<class UPerson*> PersonArray;
 
 	
 };
