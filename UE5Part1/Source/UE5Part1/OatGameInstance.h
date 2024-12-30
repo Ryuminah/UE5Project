@@ -6,6 +6,29 @@
 #include "Engine/GameInstance.h"
 #include "OatGameInstance.generated.h"
 
+USTRUCT()
+struct FStudentData
+{
+	GENERATED_BODY()
+
+	FStudentData()
+	{
+		Name = TEXT("Default");
+		Order = -1;
+	}
+
+	// 구조체는 언리얼 오브젝트가 아니기 때문에, NewObject를 활용하지 않는다.
+	// 따라서 인자가 있는 생성자를 구현
+	FStudentData(FString InName, int32 InOrder) : Name(InName), Order(InOrder){ }
+
+	// UObject* 타입이 아니기 때문에, UPROPERTY()여도 되고, 아니어도 무관하다.
+	UPROPERTY()
+	FString Name;
+
+	UPROPERTY()
+	int32 Order;
+};
+
 /**
  * 
  */
@@ -16,19 +39,22 @@ class UE5PART1_API UOatGameInstance : public UGameInstance
 	
 public:
 	UOatGameInstance();
-
 	virtual void Init() override;
 
-private:
-	// TObjectPtr을 이용해서 전방선언
-	UPROPERTY()
-	TObjectPtr<class UCourseInfo> CourseInfo;
-	
 	UPROPERTY()
 	FString SchoolName;
 
+private:
 	UPROPERTY()
-	TArray<class UPerson*> PersonArray;
+	TArray<TObjectPtr<class UPerson>> PersonArray;
 
-	
+	// 메모리를 관리할 필요가 없기 때문에, UPROPERTY()를 붙이지 않음.
+	TArray<FStudentData> StudentArray;
+	TMap<int32, FString> StudentsMap;
+
+	// 언리얼 오브젝트를 포인터의 형태로 TArray내부에서 관리할 경우
+	// 필수적으로 UPROPERTY()를 붙여야 함.
+	UPROPERTY()
+	TArray<TObjectPtr<class UStudent>> Students;
+
 };
