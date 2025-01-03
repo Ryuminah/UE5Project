@@ -6,6 +6,7 @@
 #include "Staff.h"
 #include "Card.h"
 #include "CourseInfo.h"
+#include "StudentManager.h"
 #include "Algo/Accumulate.h"
 
 FString MakeRandomName()
@@ -42,6 +43,8 @@ void UOatGameInstance::Init()
 	// Outer를 통해 컴포지션 관계 설정 (CourseInfo를 MyGameInstance의 서브 오브젝트로 둔다.)
 	//CourseInfo = NewObject<UCourseInfo>(this);
 
+	StudentManager = new FStudentManager(NewObject<UStudent>());
+
 	UE_LOG(LogTemp, Log, TEXT("============================================"));
 	
 
@@ -65,5 +68,13 @@ void UOatGameInstance::Init()
 	// MultiMap의 경우 중복을 허용한다.
 
 	UE_LOG(LogTemp, Log, TEXT("============================================"));
+}
+
+void UOatGameInstance::Shutdown()
+{
+	Super::Shutdown();
+
+	delete StudentManager;
+	StudentManager = nullptr;
 }
  

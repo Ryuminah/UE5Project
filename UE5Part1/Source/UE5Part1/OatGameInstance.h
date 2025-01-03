@@ -40,6 +40,8 @@ class UE5PART1_API UOatGameInstance : public UGameInstance
 public:
 	UOatGameInstance();
 	virtual void Init() override;
+	virtual void Shutdown() override;
+
 
 	UPROPERTY()
 	FString SchoolName;
@@ -56,5 +58,8 @@ private:
 	// 필수적으로 UPROPERTY()를 붙여야 함.
 	UPROPERTY()
 	TArray<TObjectPtr<class UStudent>> Students;
+
+	// 일반 객체는 UPROPERTY()를 사용할 수 없음
+	class FStudentManager* StudentManager = nullptr;
 
 };
