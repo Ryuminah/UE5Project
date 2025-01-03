@@ -9,72 +9,159 @@
 #include "StudentManager.h"
 #include "Algo/Accumulate.h"
 
-FString MakeRandomName()
-{
-	TCHAR First[] = TEXT("김이박최고류한윤");
-	TCHAR Middle[] = TEXT("일이삼사오육칠팔");
-	TCHAR Last[] = TEXT("일이삼사오육칠팔");
+#include "JsonObjectConverter.h"
 
-	TArray<TCHAR> RandArray;
-	RandArray.SetNum(3);
-	RandArray[0] = First[FMath::RandRange(0, 7)];
-	RandArray[1] = Middle[FMath::RandRange(0, 7)];
-	RandArray[2] = Last[FMath::RandRange(0, 7)];
-
-	// ex) TArray -> [김][삼][팔]
-	// 첫번째 포인터 값을 반환하면, 반환값이 FString이기 때문에 자동으로 만들어져서 반환된다.
-	return RandArray.GetData();
-}
 
 UOatGameInstance::UOatGameInstance()
 {
-	// CDO에 해당 기본 값이 저장되어있음
-	// CDO는 에디터가 활성화 되기 이전에 초기화 되기 때문에, 에디터에서 인지를 못할 수 있음.
-	// 따라서 생성자 코드에서 CDO 관련 값을 변경할 떄는 에디터를 끄고 컴파일 한 뒤 실행하는 것이 안전함
 
-	// 객체가 생성될 때 당연히 필요한 것들에 대한 생성을 맡는다.
-	SchoolName = TEXT("학교");
 }
 
 void UOatGameInstance::Init()
 {
 	Super::Init();
 
-	// Outer를 통해 컴포지션 관계 설정 (CourseInfo를 MyGameInstance의 서브 오브젝트로 둔다.)
-	//CourseInfo = NewObject<UCourseInfo>(this);
+	FStudentData RawDataSrc(TEXT("오트"), 1);
 
-	StudentManager = new FStudentManager(NewObject<UStudent>());
-
-	UE_LOG(LogTemp, Log, TEXT("============================================"));
+	/* 1. 경로 생성 ------------------------------------------------------------*/
+	// 언리얼 프로젝트 내의 Saved 폴더의 경로를 얻어올 수 있음.
+	const FString SavedDir = FPaths::Combine(FPlatformMisc::ProjectDir(),TEXT("Saved"));
+	//UE_LOG(LogTemp, Log, TEXT("%s"), *SavedDir);
 	
+	// 저장할 파일 이름 지정
+	const FString RawDataFileName(TEXT("RawData.bin"));
 
-	const int32 StudentNum = 300;
-	for (int32 i = 1; i <= StudentNum; ++i)
+	// 파일에 대한 절대경로 값
+	FString RawDataAbsolutePath = FPaths::Combine(*SavedDir, *RawDataFileName);
+	//UE_LOG(LogTemp, Log, TEXT("%s"), *RawDataAbsolutePath);
+	// 경로 정리
+	FPaths::MakeStandardFilename(RawDataAbsolutePath);
+	//UE_LOG(LogTemp, Log, TEXT("%s"), *RawDataAbsolutePath);
+
+	/* 2. 파일 데이터 쓰기 ------------------------------------------------------------*/
+	// 파일에 사용할 수 있는 아카이브 클래스 생성
+	FArchive* RawFileWriterAr = IFileManager::Get().CreateFileWriter(*RawDataAbsolutePath);
+	
+	if (nullptr != RawFileWriterAr)
 	{
-		// 복사 비용을 고려하여 Emplace사용 권장
-		StudentArray.Emplace(FStudentData(MakeRandomName(), i));
+		// 방법1. 각각의 멤버 변수들을 직접 넣기
+		/**RawFileWriterAr << RawDataSrc.Name;
+		*RawFileWriterAr << RawDataSrc.Order;*/
+
+		// 방법2. operator << 오버로딩을 통하여 구현
+		*RawFileWriterAr << RawDataSrc;
+
+		// 쓰기 완료 후 파일을 닫고 메모리 정리
+		RawFileWriterAr->Close();
+		delete RawFileWriterAr;
+		RawFileWriterAr = nullptr;
 	}
-	 
-	// TArray를 TMap으로 변경 (dest , src , TPair를 만들어주는 람다 함수)
-	Algo::Transform(StudentArray, StudentsMap,
-		[](const FStudentData& Val) {return TPair<int32, FString>(Val.Order, Val.Name); });
-	UE_LOG(LogTemp, Log, TEXT("순번에 따른 학생 맵의 레코드 수 : %d"), StudentsMap.Num());
 
-	TMap<FString, int32> StudentsMapByUniqueName;
-	Algo::Transform(StudentArray, StudentsMapByUniqueName,
-		[](const FStudentData& Val) {return TPair<FString, int32>(Val.Name, Val.Order); });
-	UE_LOG(LogTemp, Log, TEXT("이름에 따른 학생 맵의 레코드 수 : %d"), StudentsMapByUniqueName.Num());
+	/* 3. 파일 데이터 읽기 ------------------------------------------------------------*/
+	FStudentData RawDataDest;
+	FArchive* RawFileReaderAr = IFileManager::Get().CreateFileReader(*RawDataAbsolutePath);
+	if (nullptr != RawFileReaderAr)
+	{
+		*RawFileReaderAr << RawDataDest;
 
-	// MultiMap의 경우 중복을 허용한다.
+		RawFileReaderAr->Close();
+		delete RawFileReaderAr;
+		RawFileReaderAr = nullptr;
+	}
 
-	UE_LOG(LogTemp, Log, TEXT("============================================"));
+	//UE_LOG(LogTemp, Log, TEXT("이름 : %s, 순서 : %d"), *RawDataDest.Name, RawDataDest.Order);
+
+
+	/* 언리얼 오브젝트 Read & Write  ------------------------------------------------------------*/
+	StudentSrc = NewObject<UStudent>();
+	StudentSrc->SetName(TEXT("오트"));
+	StudentSrc->SetOrder(2);
+
+	{
+		const FString ObjectDataFileName(TEXT("ObjectData.bin"));
+		FString ObjectDataAbsoultePath = FPaths::Combine(*SavedDir, *ObjectDataFileName);
+		FPaths::MakeStandardFilename(ObjectDataAbsoultePath);
+
+		/* 1. 메모리에 쓰기 ------------------------------------------------------------*/
+		// Byte Stream은 언리얼 엔진에서 아래의 버퍼를 사용
+		TArray<uint8> BufferArray;
+
+		// 사용할 Memory Writer선언 후 쓰기
+		FMemoryWriter MemoryWriterAr(BufferArray);
+		StudentSrc->Serialize(MemoryWriterAr);
+
+		/* 2. File로 저장하기 ------------------------------------------------------------*/
+		// 편의성을 위해 스마트 포인터 사용
+		// 유니크 포인터를 선언한 로직을 벗어났을 경우 알아서 메모리가 해제됨.
+		if (TUniquePtr<FArchive> FileWriterAr = TUniquePtr<FArchive>(IFileManager::Get().CreateFileWriter(*ObjectDataAbsoultePath)))
+		{
+			// 메모리에 저장되어 있는 데이터를 파일에 쓴 후 ★파일 닫기★
+			*FileWriterAr << BufferArray;
+			FileWriterAr->Close();
+		}
+
+		/* 3. 저장된 File을 다시 Memory에 읽기 ------------------------------------------------------------*/
+		TArray<uint8> BufferArrayFromFile;
+		if (TUniquePtr<FArchive> FileReaderAr = TUniquePtr<FArchive>(IFileManager::Get().CreateFileReader(*ObjectDataAbsoultePath)))
+		{
+			// 파일의 내용이 버퍼에 담김
+			*FileReaderAr << BufferArrayFromFile;
+			FileReaderAr->Close();
+		}
+
+		// 읽는 방식 또한 같다.
+		FMemoryReader MemoryReaderAr(BufferArrayFromFile);
+		UStudent* StudentDest = NewObject<UStudent>();
+		StudentDest->Serialize(MemoryReaderAr);
+
+		//UE_LOG(LogTemp, Log, TEXT("[UObject]이름 : %s, 순서 : %d"), *StudentDest->GetName(), StudentDest->GetOrder());
+	}
+
+	//#include "JsonObjectConverter.h" 헤더 필요!!!!!
+	/* Json Read & Write  ------------------------------------------------------------*/
+	{
+		const FString JsonDataFileName(TEXT("JsonData.txt"));
+		FString JsonDataAbsoultePath = FPaths::Combine(*SavedDir, *JsonDataFileName);
+		FPaths::MakeStandardFilename(JsonDataAbsoultePath);
+
+		/* 1. JsonObject로 변환 ------------------------------------------------------------*/
+		// 언리얼 오브젝트 -> JsonObject로 변환
+		// NotNull을 보장하기 때문에 생성과 동시에 메모리를 할당해주어야 함.
+		TSharedRef<FJsonObject> JsonObjectSrc = MakeShared<FJsonObject>();
+
+		// UObject또한 결국 UStruct를 상속받아서 만들기 때문에, UStruct를 JsonObject으로 변환한다.
+		// 스키마 정보(데이터의 형식과 필드 정의) / 오브젝트 포인터 / JsonObject 포인터
+		FJsonObjectConverter::UStructToJsonObject(StudentSrc->GetClass(), StudentSrc, JsonObjectSrc);
+
+		/* 2. JsonObject -> File로 쓰기 -----------------------------------------------------*/
+		// Json으로 쓰는 Archive 생성
+		FString JsonOutString;
+		TSharedRef<TJsonWriter<TCHAR>> JsonWriterAr = TJsonWriterFactory<TCHAR>::Create(&JsonOutString);
+
+		// JsonOjbect , JsonArchive
+		if (FJsonSerializer::Serialize(JsonObjectSrc, JsonWriterAr))
+		{
+			// Json이 문자열 형태로 잘 만들어 졌을 것.
+			// 해당 함수는 인코딩을 신경쓰지 않아도 운영체제에 잘 저장해줌.
+			FFileHelper::SaveStringToFile(JsonOutString, *JsonDataAbsoultePath);
+		}
+
+		/* 3. File -> JsonReader-> 오브젝트로 읽기--------------------------------------------*/
+		FString JsonInString;
+		FFileHelper::LoadFileToString(JsonInString, *JsonDataAbsoultePath);
+
+		TSharedRef<TJsonReader<TCHAR>> JsonReaderAr = TJsonReaderFactory<TCHAR>::Create(JsonInString);
+
+		// 문자열이 제대로 생성되지 않을 경우 Null이 들어갈 수 있기 때문에 Ptr로 생성
+		TSharedPtr<FJsonObject> JsonObjectDest;
+		if (FJsonSerializer::Deserialize(JsonReaderAr, JsonObjectDest))
+		{
+			UStudent* JsonStudentDest = NewObject<UStudent>();
+			// JsonObject의 SharedRef 타입 , CDO , UStruct
+			if (FJsonObjectConverter::JsonObjectToUStruct(JsonObjectDest.ToSharedRef(), JsonStudentDest->GetClass(), JsonStudentDest))
+			{
+				UE_LOG(LogTemp, Log, TEXT("[Json]이름 : %s, 순서 : %d"), *JsonStudentDest->GetName(), JsonStudentDest->GetOrder());
+			}
+		}
+	}
 }
-
-void UOatGameInstance::Shutdown()
-{
-	Super::Shutdown();
-
-	delete StudentManager;
-	StudentManager = nullptr;
-}
- 

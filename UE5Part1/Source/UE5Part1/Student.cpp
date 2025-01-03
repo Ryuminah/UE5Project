@@ -6,18 +6,17 @@
 
 UStudent::UStudent()
 {
-	Name = TEXT("학생");
-	Card->SetCardType(ECardType::Student);
+	Name = TEXT("Default");
+	Order = -1;
+	//Card->SetCardType(ECardType::Student);
 }
 
-void UStudent::DoLesson()
+void UStudent::Serialize(FArchive& Ar)
 {
-	ILessonInterface::DoLesson();
-	UE_LOG(LogTemp, Log, TEXT("%s 수업 듣는 중"), *Name);
-}
+	// 언리얼 오브젝트가 가져야하는 기본적인 정보들을 Super에서 처리해줌
+	Super::Serialize(Ar);
 
-void UStudent::GetNotification(const FString& School, const FString& NewCourseInfo)
-{
-	UE_LOG(LogTemp, Log, TEXT("[Student] %s 님이 %s로부터 밭은 메세지 : %s"), *Name ,*School, *NewCourseInfo);
+	// 프로퍼티의 데이터 쓰는 순서만 지정하면 됨.
+	Ar << Order;
+	Ar << Name;
 }
-
