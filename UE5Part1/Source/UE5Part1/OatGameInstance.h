@@ -60,6 +60,7 @@ private:
 	TArray<TObjectPtr<class UStudent>> Students;
 
 	// 일반 객체는 UPROPERTY()를 사용할 수 없음
+	// FStudent 내부의 UObject는 가비지 컬렉터에 의해 무조건 메모리가 회수됨. 
 	class FStudentManager* StudentManager = nullptr;
 
 };
