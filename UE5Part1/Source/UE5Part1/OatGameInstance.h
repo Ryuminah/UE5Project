@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "Engine/StreamableManager.h"
 #include "OatGameInstance.generated.h"
 
 // UStruct가 아닌 일반 C++ Struct
@@ -40,7 +41,20 @@ public:
 	UOatGameInstance();
 	virtual void Init() override;
 
+	void SaveStudentPackage() const;
+	void LoadStudentPackage() const;
+	void LoadStudentObject() const;
+
+
+
 private:
 	UPROPERTY()
 	TObjectPtr<class UStudent> StudentSrc;
+
+	// 패키지/대표 에셋 이름 지정
+	static const FString PackageName;
+	static const FString AssetName;
+
+	FStreamableManager StreamableManager;
+	TSharedPtr<FStreamableHandle> Handle;
 };
